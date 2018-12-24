@@ -120,7 +120,8 @@ sound/
 .mp3
 
 # for dev
-dev/
+data/
 
 # secret
 settings.py
+secret/
