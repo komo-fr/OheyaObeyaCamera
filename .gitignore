@@ -118,3 +118,9 @@ dmypy.json
 sound/
 .wav
 .mp3
+
+# for dev
+dev/
+
+# secret
+settings.py
