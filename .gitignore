@@ -125,3 +125,5 @@ data/
 # secret
 settings.py
 secret/
+
+scripts/capture.sh
