@@ -28,6 +28,7 @@ class OheyaObeyaError(Exception):
 
 
 def main(n_repeat: int = 1, level: str = None) -> None:
+    n_repeat = 1 if not n_repeat else n_repeat
     logger.debug('Level: {}'.format(level))
 
     pygame.mixer.init()
@@ -42,7 +43,7 @@ def main(n_repeat: int = 1, level: str = None) -> None:
 
     for i in range(0, n_repeat):
         try:
-            # capture(level)
+            capture(level)
             pygame.mixer.music.load(str(Path(SOUND_ROOT_PATH) / 'sf.wav'))
             pygame.mixer.music.play(1)
             logger.info(str(i))
@@ -70,31 +71,38 @@ def main(n_repeat: int = 1, level: str = None) -> None:
 
 
 def capture(level: str = None) -> None:
+    n_images = 0
+
     # capture
-    for i in range(0, 2):
+    for i in range(0, 3):
         cap = cv2.VideoCapture(i)
         image = cap.read()[1]
-        logger.debug('camera {}: {}'.format(i, image.shape))
 
         # 想定しているUSBカメラで撮影しているかのチェック
         # たまに変わるので暫定で入れているが、多分もっといい方法がある
         if image is None:
-            break
+            logger.info('Camera {} is skipped.'.format(i))
+            cap.release()
+            continue
+
+        logger.debug('camera {}: {}'.format(i, image.shape))
 
         if image.shape == settings.CAMERA_RAW_SIZE:
-            break
-    else:
+            # save
+            file_name = dt.now().strftime("%Y%m%d_%H%M%S_{}.jpg".format(i))
+            time.sleep(0.5)
+            dir_name = 'unknown' if not level else level
+            path = Path(SETTINGS['data_root_path']) / 'images' / dir_name / file_name
+            path.parent.mkdir(exist_ok=True, parents=True)
+            cv2.imwrite(str(path), image)
+            logger.info('Save: {}'.format(path))
+            n_images += 1
+
+        cap.release()
+
+    if n_images == 0:
         message = 'Failed to capture. Not found an expected camera.'
         raise OheyaObeyaError(message)
-
-    # save
-    file_name = dt.now().strftime("%Y%m%d_%H%M%S.jpg")
-    dir_name = 'unknown' if not level else level
-    path = Path(SETTINGS['data_root_path']) / 'images' / dir_name / file_name
-    path.parent.mkdir(exist_ok=True, parents=True)
-    cv2.imwrite(str(path), image)
-
-    cap.release()
 
 
 if __name__ == '__main__':
