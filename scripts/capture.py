@@ -74,7 +74,7 @@ def capture(level: str = None) -> None:
     n_images = 0
 
     # capture
-    for i in range(0, 3):
+    for i in range(0, 4):
         cap = cv2.VideoCapture(i)
         image = cap.read()[1]
 
