@@ -27,7 +27,7 @@ class OheyaObeyaError(Exception):
     "Apprlication Error"
 
 
-def main(n_repeat: int = 1, level: str = None) -> None:
+def main(n_repeat: int = 1, level: str = None, n_interval: int = 5) -> None:
     n_repeat = 1 if not n_repeat else n_repeat
     logger.debug('Level: {}'.format(level))
 
@@ -39,7 +39,6 @@ def main(n_repeat: int = 1, level: str = None) -> None:
     #   使用する際は指定のパスに適当な音源を配置すること
     pygame.mixer.music.load(str(Path(SOUND_ROOT_PATH) / 'start.mp3'))
     pygame.mixer.music.play(1)
-    n_interval = 5
 
     for i in range(0, n_repeat):
         try:
@@ -89,10 +88,10 @@ def capture(level: str = None) -> None:
 
         if image.shape == settings.CAMERA_RAW_SIZE:
             # save
-            file_name = dt.now().strftime("%Y%m%d_%H%M%S_{}.jpg".format(i))
+            file_name = dt.now().strftime("%Y%m%d_%H%M%S_{camera_id}_{level}.jpg".format(camera_id=i, level=level))
             time.sleep(0.5)
             dir_name = 'unknown' if not level else level
-            path = Path(SETTINGS['data_root_path']) / 'images' / dir_name / file_name
+            path = Path(SETTINGS['data_root_path']) / 'images' / dir_name / str(i) / file_name
             path.parent.mkdir(exist_ok=True, parents=True)
             cv2.imwrite(str(path), image)
             logger.info('Save: {}'.format(path))
@@ -114,6 +113,8 @@ if __name__ == '__main__':
                         help='汚さの度合いを1-5またはclean or dirtyで指定する（数字の場合、大きい方が汚い）')
     parser.add_argument('-r', '--repeat',
                         help='連続撮影モード', type=int)
+    parser.add_argument('-i', '--interval',
+                        help='連続撮影モードにおける撮影と撮影のインターバル', type=int)
     args = parser.parse_args()
 
     logger.info('Start.')
@@ -125,5 +126,5 @@ if __name__ == '__main__':
         SETTINGS = settings.DEV_SETTINGS
         logger.info('mode = dev')
 
-    main(args.repeat, args.level)
+    main(args.repeat, args.level, args.interval)
     logger.info('Completed.')
